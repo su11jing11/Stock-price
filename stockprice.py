@@ -4,7 +4,10 @@ import time
 from sklearn import datasets,linear_model
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
+from
 # from sklearn.metrics import mean_squared_error,r2_score
+FIRST=False
+SECOND=True
 
 txtfile = 'msft_stockprices_dataset.csv'
 
@@ -51,28 +54,34 @@ def readFromCSV(txtfile):
 if __name__ == "__main__":
     stock=readFromCSV(txtfile)
     length = len(stock)
-    print(stock[0].openPrice.__class__)
-    X=[]
-    y=[]
-    for i in range(length):
-        X.append((int)(stock[i].openPrice))
-        y.append(stock[i].closePrice)
-    X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=int(time.time()))
-    X_train=np.array(X_train)
-    X_train = X_train.reshape(-1, 1)
-    X_test=np.array(X_test)
-    X_test = X_test.reshape(-1, 1)
-    regr = linear_model.LinearRegression()
-    regr.fit(X_train, y_train)
-    disabetes_y_pred = regr.predict(X_test)
-    print(disabetes_y_pred)
-    plt.scatter(X_test,y_test,color='black')
-    plt.plot(X_test,disabetes_y_pred,color='blue',linewidth=3)
-    plt.xticks(())
-    plt.yticks(())
-    plt.show()
+    if FIRST:
+        X=[]
+        y=[]
+        for i in range(length):
+            X.append((int)(stock[i].openPrice))
+            y.append(stock[i].closePrice)
+        X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=int(time.time()))
+        X_train=np.array(X_train)
+        X_train = X_train.reshape(-1, 1)
+        X_test=np.array(X_test)
+        X_test = X_test.reshape(-1, 1)
+        regr = linear_model.LinearRegression()
+        regr.fit(X_train, y_train)
+        disabetes_y_pred = regr.predict(X_test)
+        within_cnt=0
+        for i in range(len(X_test)):
+            percentage=(disabetes_y_pred[i]-y_test[i])/y_test[i]
+            if(percentage<0.01):
+                within_cnt+=1
+        print("the number that within the request",within_cnt/len(X_test))
 
-    if False:
+        plt.scatter(X_test,y_test,color='black')
+        plt.plot(X_test,disabetes_y_pred,color='blue',linewidth=3)
+        plt.xticks(())
+        plt.yticks(())
+        plt.show()
+
+    if SECOND:
         trainLength = length*4//5
         X_total = np.arange(length)
         X_value = X_total[:trainLength]
@@ -87,7 +96,7 @@ if __name__ == "__main__":
 
         X_value1 = np.array(X_value).reshape([trainLength,1])
         closePriceList1 = np.array(closePriceList).reshape([trainLength,1])
-        poly_reg = PolynomialFeatures(degree=3)
+        poly_reg = PolynomialFeatures(degree=2)
         X_ploy=poly_reg.fit_transform(X_value1)
         lin_reg_2 = linear_model.LinearRegression()
         lin_reg_2.fit(X_ploy,closePriceList1)
